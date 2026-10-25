@@ -16,37 +16,48 @@ public class ColaboradorService {
     @Autowired
     private ColaboradorRepository colaboradorRepository;
 
-    public Colaborador salvar(Colaborador colaborador) {
 
-        if (colaboradorRepository.existsByEmail(colaborador.getEmail())) {
+    public Colaborador salvar(Colaborador colaborador) {
+        String emailNormalizado = colaborador.getEmail()
+                .trim()
+                .toLowerCase();
+
+        colaborador.setEmail(emailNormalizado);
+
+        if (colaboradorRepository.existsByEmail(emailNormalizado)) {
             throw new EmailDuplicadoException();
         }
 
         return colaboradorRepository.save(colaborador);
     }
 
+
     public List<Colaborador> listarTodos() {
         return colaboradorRepository.findAll();
     }
-
 
     public Colaborador atualizar(Long id, Colaborador colaboradorAtualizado) {
 
         Colaborador colaboradorExistente = colaboradorRepository.findById(id)
                 .orElseThrow(ColaboradorNaoEncontradoException::new);
 
-        if (!colaboradorExistente.getEmail().equals(colaboradorAtualizado.getEmail())
-                && colaboradorRepository.existsByEmail(colaboradorAtualizado.getEmail())) {
+        String emailNormalizado = colaboradorAtualizado.getEmail()
+                .trim()
+                .toLowerCase();
+
+        if (!colaboradorExistente.getEmail().equals(emailNormalizado)
+                && colaboradorRepository.existsByEmail(emailNormalizado)) {
             throw new EmailDuplicadoException();
         }
 
         colaboradorExistente.setNome(colaboradorAtualizado.getNome());
-        colaboradorExistente.setEmail(colaboradorAtualizado.getEmail());
+        colaboradorExistente.setEmail(emailNormalizado);
         colaboradorExistente.setPerfil(colaboradorAtualizado.getPerfil());
         colaboradorExistente.setAtivo(colaboradorAtualizado.isAtivo());
 
         return colaboradorRepository.save(colaboradorExistente);
     }
+
 
     public void desativar(Long id) {
 
