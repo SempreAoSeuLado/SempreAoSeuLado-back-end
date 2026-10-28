@@ -12,16 +12,76 @@ A proposta é conectar organizações, pessoas interessadas em adotar e voluntá
 - Apoiar a organização e o acompanhamento dos processos de adoção e acolhimento.
 - Dar mais visibilidade aos animais e às necessidades das ONGs.
 
+## Funcionalidades implementadas
+
+- Cadastro, listagem, atualização e exclusão de animais.
+- Cadastro e listagem de colaboradores.
+- Atualização de colaboradores.
+- Listagem de colaboradores ativos.
+- Desativação de colaboradores sem exclusão do registro.
+- Validação de campos obrigatórios e endereços de e-mail.
+- Normalização de e-mails para letras minúsculas.
+- Tratamento global de erros da API.
+
 ## Funcionalidades planejadas
 
-- Cadastro de ONGs e de seus animais.
-- Consulta de animais disponíveis para adoção.
+- Cadastro e gerenciamento de ONGs.
 - Registro de interesse em adoção e acompanhamento das solicitações.
-- Cadastro de voluntários interessados em oferecer lar temporário.
-- Consulta e atualização de vagas disponíveis em lares temporários.
-- Associação de animais a lares temporários, conforme a disponibilidade.
+- Cadastro de lares temporários e controle de vagas disponíveis.
+- Associação de animais a lares temporários.
 
-> O projeto está em fase inicial de desenvolvimento. As funcionalidades acima representam o escopo planejado e ainda não devem ser consideradas disponíveis.
+## API
+
+A aplicação expõe os seguintes endpoints, sem autenticação configurada atualmente:
+
+### Animais
+
+| Método | Endpoint | Descrição |
+| --- | --- | --- |
+| `GET` | `/animais` | Lista todos os animais |
+| `POST` | `/animais` | Cadastra um animal |
+| `PUT` | `/animais/{id}` | Atualiza um animal |
+| `DELETE` | `/animais/{id}` | Exclui um animal |
+
+Campos obrigatórios de um animal: `nome`, `especie` e `situacao`.
+
+Exemplo de cadastro:
+
+```json
+{
+	"nome": "Luna",
+	"especie": "Cachorro",
+	"situacao": "Disponível para adoção"
+}
+```
+
+### Colaboradores
+
+| Método | Endpoint | Descrição |
+| --- | --- | --- |
+| `GET` | `/colaboradores` | Lista todos os colaboradores |
+| `GET` | `/colaboradores/ativos` | Lista apenas colaboradores ativos |
+| `POST` | `/colaboradores` | Cadastra um colaborador |
+| `PUT` | `/colaboradores/{id}` | Atualiza um colaborador |
+| `PATCH` | `/colaboradores/{id}/desativar` | Desativa um colaborador |
+
+Campos obrigatórios de um colaborador: `nome`, `email` e `perfil`. O e-mail deve ser válido e não pode estar cadastrado anteriormente.
+
+Exemplo de cadastro:
+
+```json
+{
+	"nome": "Maria Silva",
+	"email": "maria@example.com",
+	"perfil": "Voluntária"
+}
+```
+
+### Respostas de erro
+
+- `400 Bad Request`: dados enviados não passaram pela validação.
+- `404 Not Found`: animal ou colaborador não encontrado.
+- `409 Conflict`: e-mail de colaborador já cadastrado.
 
 ## Tecnologias
 
@@ -50,8 +110,27 @@ SempreAoSeuLado-back-end/
 	└── src/
 		├── main/
 		│   ├── java/br/com/sempreaoseulado/
+		│   │   ├── SempreAoSeuLadoApplication.java
+		│   │   ├── controller/
+		│   │   │   ├── AnimalController.java
+		│   │   │   └── ColaboradorController.java
+		│   │   ├── entity/
+		│   │   │   ├── Animal.java
+		│   │   │   └── Colaborador.java
+		│   │   ├── exception/
+		│   │   │   ├── AnimalNaoEncontradoException.java
+		│   │   │   ├── ColaboradorNaoEncontradoException.java
+		│   │   │   ├── EmailDuplicadoException.java
+		│   │   │   └── GlobalExceptionHandler.java
+		│   │   ├── repository/
+		│   │   │   ├── AnimalRepository.java
+		│   │   │   └── ColaboradorRepository.java
+		│   │   └── service/
+		│   │       ├── AnimalService.java
+		│   │       └── ColaboradorService.java
 		│   └── resources/application.properties
 		└── test/java/br/com/sempreaoseulado/
+			└── SempreAoSeuLadoApplicationTests.java
 ```
 
 ## Como executar
@@ -81,7 +160,7 @@ No Linux ou macOS:
 ./mvnw spring-boot:run
 ```
 
-Por padrão, o servidor utiliza o endereço `http://localhost:8080`. Como os endpoints de negócio ainda serão desenvolvidos, isso não significa que exista uma página ou rota disponível em `/`.
+Por padrão, o servidor utiliza o endereço `http://localhost:8080`. A API pode ser acessada, por exemplo, em `http://localhost:8080/animais`.
 
 ### Executar os testes
 
@@ -105,4 +184,4 @@ O driver do MySQL já está incluído nas dependências, mas a conexão com um b
 
 ## Status
 
-Em desenvolvimento: a estrutura inicial do back-end está criada, e as regras de negócio, os endpoints e os fluxos de adoção e lar temporário serão implementados nas próximas etapas.
+Em desenvolvimento: os módulos de animais e colaboradores já possuem operações básicas de persistência e validação. Os fluxos de adoção, ONGs e lares temporários serão implementados nas próximas etapas.
