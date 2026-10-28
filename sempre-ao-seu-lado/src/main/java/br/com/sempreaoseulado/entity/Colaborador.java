@@ -3,6 +3,7 @@ package br.com.sempreaoseulado.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 public class Colaborador {
@@ -18,6 +19,11 @@ public class Colaborador {
     @Email(message = "Informe um e-mail válido")
     @Column(nullable = false, unique = true)
     private String email;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @NotBlank(message = "A senha do colaborador é obrigatória")
+    @Column(nullable = false)
+    private String senha;
 
     @NotBlank(message = "O perfil do colaborador é obrigatório")
     private String perfil;
@@ -66,5 +72,13 @@ public class Colaborador {
 
     public void setAtivo(boolean ativo) {
         this.ativo = ativo;
+    }
+
+    public String getSenha() {
+        return senha;
+    }
+
+    public void setSenha(String senha) {
+        this.senha = senha;
     }
 }

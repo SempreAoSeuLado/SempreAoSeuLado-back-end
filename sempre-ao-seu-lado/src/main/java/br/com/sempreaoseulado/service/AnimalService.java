@@ -6,6 +6,10 @@ import br.com.sempreaoseulado.exception.AnimalNaoEncontradoException;
 import br.com.sempreaoseulado.repository.AnimalRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
@@ -18,6 +22,18 @@ public class AnimalService {
     public List<Animal> listarTodos() {
         return animalRepository.findAll();
     }
+
+
+    public Page<Animal> listarPaginado(int pagina, int tamanho) {
+        Pageable pageable = PageRequest.of(
+                pagina,
+                tamanho,
+                Sort.by("id").ascending()
+        );
+
+        return animalRepository.findAll(pageable);
+    }
+
 
     public Animal salvar(Animal animal) {
         return animalRepository.save(animal);

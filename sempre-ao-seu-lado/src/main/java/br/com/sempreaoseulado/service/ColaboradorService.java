@@ -7,6 +7,7 @@ import br.com.sempreaoseulado.exception.EmailDuplicadoException;
 import br.com.sempreaoseulado.repository.ColaboradorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 
@@ -16,6 +17,8 @@ public class ColaboradorService {
     @Autowired
     private ColaboradorRepository colaboradorRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public Colaborador salvar(Colaborador colaborador) {
         String emailNormalizado = colaborador.getEmail()
@@ -27,6 +30,10 @@ public class ColaboradorService {
         if (colaboradorRepository.existsByEmail(emailNormalizado)) {
             throw new EmailDuplicadoException();
         }
+
+        colaborador.setSenha(
+                passwordEncoder.encode(colaborador.getSenha())
+        );
 
         return colaboradorRepository.save(colaborador);
     }
@@ -54,6 +61,13 @@ public class ColaboradorService {
         colaboradorExistente.setEmail(emailNormalizado);
         colaboradorExistente.setPerfil(colaboradorAtualizado.getPerfil());
         colaboradorExistente.setAtivo(colaboradorAtualizado.isAtivo());
+
+        if (colaboradorAtualizado.getSenha() != null
+                && !colaboradorAtualizado.getSenha().isBlank()) {
+            colaboradorExistente.setSenha(
+                    passwordEncoder.encode(colaboradorAtualizado.getSenha())
+            );
+        }
 
         return colaboradorRepository.save(colaboradorExistente);
     }

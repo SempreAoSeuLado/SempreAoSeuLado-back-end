@@ -7,6 +7,9 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 import java.util.List;
 
@@ -17,9 +20,50 @@ public class AnimalController {
     @Autowired
     private AnimalService animalService;
 
+//    @GetMapping
+//    public List<Animal> listarTodos() {
+//        return animalService.listarTodos();
+//    }
+
     @GetMapping
-    public List<Animal> listarTodos() {
-        return animalService.listarTodos();
+    public Page<Animal> listarTodos(
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "10") int tamanho) {
+
+        if (pagina < 0) {
+            throw new IllegalArgumentException(
+                    "O número da página não pode ser negativo"
+            );
+        }
+
+        if (tamanho < 1 || tamanho > 100) {
+            throw new IllegalArgumentException(
+                    "O tamanho da página deve estar entre 1 e 100"
+            );
+        }
+
+        return animalService.listarPaginado(pagina, tamanho);
+    }
+
+
+    @GetMapping("/pagina")
+    public Page<Animal> listarPaginado(
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "10") int tamanho) {
+
+        if (pagina < 0) {
+            throw new IllegalArgumentException(
+                    "O número da página não pode ser negativo"
+            );
+        }
+
+        if (tamanho < 1 || tamanho > 100) {
+            throw new IllegalArgumentException(
+                    "O tamanho da página deve estar entre 1 e 100"
+            );
+        }
+
+        return animalService.listarPaginado(pagina, tamanho);
     }
 
     @PostMapping
