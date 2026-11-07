@@ -1,7 +1,8 @@
 
 package br.com.sempreaoseulado.controller;
 
-import br.com.sempreaoseulado.entity.Animal;
+import br.com.sempreaoseulado.request.AnimalRequest;
+import br.com.sempreaoseulado.response.AnimalResponse;
 import br.com.sempreaoseulado.service.AnimalService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,18 +19,26 @@ public class AnimalController {
     private AnimalService animalService;
 
     @GetMapping
-    public List<Animal> listarTodos() {
+    public List<AnimalResponse> listarTodos() {
         return animalService.listarTodos();
     }
 
+    @GetMapping("/{id}")
+    public AnimalResponse buscarPorId(@PathVariable Long id) {
+        return animalService.buscarPorId(id);
+    }
+
     @PostMapping
-    public Animal salvar(@Valid @RequestBody Animal animal) {
-        return animalService.salvar(animal);
+    public AnimalResponse salvar(@Valid @RequestBody AnimalRequest request) {
+        return animalService.salvar(request);
     }
 
     @PutMapping("/{id}")
-    public Animal atualizar(@PathVariable Long id, @Valid @RequestBody Animal animal) {
-        return animalService.atualizar(id, animal);
+    public AnimalResponse atualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody AnimalRequest request) {
+
+        return animalService.atualizar(id, request);
     }
 
     @DeleteMapping("/{id}")
@@ -37,6 +46,4 @@ public class AnimalController {
         animalService.excluir(id);
         return ResponseEntity.noContent().build();
     }
-
-
 }

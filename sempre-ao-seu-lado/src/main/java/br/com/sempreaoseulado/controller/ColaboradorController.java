@@ -1,7 +1,8 @@
 
 package br.com.sempreaoseulado.controller;
 
-import br.com.sempreaoseulado.entity.Colaborador;
+import br.com.sempreaoseulado.request.ColaboradorRequest;
+import br.com.sempreaoseulado.response.ColaboradorResponse;
 import br.com.sempreaoseulado.service.ColaboradorService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,21 +19,27 @@ public class ColaboradorController {
     private ColaboradorService colaboradorService;
 
     @PostMapping
-    public Colaborador salvar(@Valid @RequestBody Colaborador colaborador) {
-        return colaboradorService.salvar(colaborador);
+    public ColaboradorResponse salvar(
+            @Valid @RequestBody ColaboradorRequest request) {
+        return colaboradorService.salvar(request);
     }
 
     @GetMapping
-    public List<Colaborador> listarTodos() {
+    public List<ColaboradorResponse> listarTodos() {
         return colaboradorService.listarTodos();
     }
 
-    @PutMapping("/{id}")
-    public Colaborador atualizar(
-            @PathVariable Long id,
-            @Valid @RequestBody Colaborador colaborador) {
+    @GetMapping("/{id}")
+    public ColaboradorResponse buscarPorId(@PathVariable Long id) {
+        return colaboradorService.buscarPorId(id);
+    }
 
-        return colaboradorService.atualizar(id, colaborador);
+    @PutMapping("/{id}")
+    public ColaboradorResponse atualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody ColaboradorRequest request) {
+
+        return colaboradorService.atualizar(id, request);
     }
 
     @PatchMapping("/{id}/desativar")
@@ -42,8 +49,7 @@ public class ColaboradorController {
     }
 
     @GetMapping("/ativos")
-    public List<Colaborador> listarAtivos() {
+    public List<ColaboradorResponse> listarAtivos() {
         return colaboradorService.listarAtivos();
     }
-
 }
