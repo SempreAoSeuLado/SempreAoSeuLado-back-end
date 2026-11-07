@@ -5,6 +5,8 @@ import br.com.sempreaoseulado.entity.Colaborador;
 import br.com.sempreaoseulado.exception.ColaboradorNaoEncontradoException;
 import br.com.sempreaoseulado.exception.EmailDuplicadoException;
 import br.com.sempreaoseulado.repository.ColaboradorRepository;
+import br.com.sempreaoseulado.request.ColaboradorRequest;
+import br.com.sempreaoseulado.response.ColaboradorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,32 +18,47 @@ public class ColaboradorService {
     @Autowired
     private ColaboradorRepository colaboradorRepository;
 
+    public ColaboradorResponse salvar(ColaboradorRequest request) {
 
-    public Colaborador salvar(Colaborador colaborador) {
-        String emailNormalizado = colaborador.getEmail()
+        String emailNormalizado = request.getEmail()
                 .trim()
                 .toLowerCase();
-
-        colaborador.setEmail(emailNormalizado);
 
         if (colaboradorRepository.existsByEmail(emailNormalizado)) {
             throw new EmailDuplicadoException();
         }
 
-        return colaboradorRepository.save(colaborador);
+        Colaborador colaborador = new Colaborador();
+
+        colaborador.setNome(request.getNome());
+        colaborador.setEmail(emailNormalizado);
+        colaborador.setPerfil(request.getPerfil());
+
+        Colaborador colaboradorSalvo = colaboradorRepository.save(colaborador);
+
+        return converterParaResponse(colaboradorSalvo);
     }
 
-
-    public List<Colaborador> listarTodos() {
-        return colaboradorRepository.findAll();
+    public List<ColaboradorResponse> listarTodos() {
+        return colaboradorRepository.findAll()
+                .stream()
+                .map(this::converterParaResponse)
+                .toList();
     }
 
-    public Colaborador atualizar(Long id, Colaborador colaboradorAtualizado) {
+    public ColaboradorResponse buscarPorId(Long id) {
+        Colaborador colaborador = colaboradorRepository.findById(id)
+                .orElseThrow(() -> new ColaboradorNaoEncontradoException());
+
+        return converterParaResponse(colaborador);
+    }
+
+    public ColaboradorResponse atualizar(Long id, ColaboradorRequest request) {
 
         Colaborador colaboradorExistente = colaboradorRepository.findById(id)
                 .orElseThrow(ColaboradorNaoEncontradoException::new);
 
-        String emailNormalizado = colaboradorAtualizado.getEmail()
+        String emailNormalizado = request.getEmail()
                 .trim()
                 .toLowerCase();
 
@@ -50,14 +67,15 @@ public class ColaboradorService {
             throw new EmailDuplicadoException();
         }
 
-        colaboradorExistente.setNome(colaboradorAtualizado.getNome());
+        colaboradorExistente.setNome(request.getNome());
         colaboradorExistente.setEmail(emailNormalizado);
-        colaboradorExistente.setPerfil(colaboradorAtualizado.getPerfil());
-        colaboradorExistente.setAtivo(colaboradorAtualizado.isAtivo());
+        colaboradorExistente.setPerfil(request.getPerfil());
 
-        return colaboradorRepository.save(colaboradorExistente);
+        Colaborador colaboradorAtualizado =
+                colaboradorRepository.save(colaboradorExistente);
+
+        return converterParaResponse(colaboradorAtualizado);
     }
-
 
     public void desativar(Long id) {
 
@@ -69,9 +87,20 @@ public class ColaboradorService {
         colaboradorRepository.save(colaborador);
     }
 
-    public List<Colaborador> listarAtivos() {
-        return colaboradorRepository.findByAtivoTrue();
+    public List<ColaboradorResponse> listarAtivos() {
+        return colaboradorRepository.findByAtivoTrue()
+                .stream()
+                .map(this::converterParaResponse)
+                .toList();
     }
 
-
+    private ColaboradorResponse converterParaResponse(Colaborador colaborador) {
+        return new ColaboradorResponse(
+                colaborador.getId(),
+                colaborador.getNome(),
+                colaborador.getEmail(),
+                colaborador.getPerfil(),
+                colaborador.isAtivo()
+        );
+    }
 }
