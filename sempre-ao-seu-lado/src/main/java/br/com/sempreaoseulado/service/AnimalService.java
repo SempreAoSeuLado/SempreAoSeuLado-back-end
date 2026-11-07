@@ -4,6 +4,8 @@ package br.com.sempreaoseulado.service;
 import br.com.sempreaoseulado.entity.Animal;
 import br.com.sempreaoseulado.exception.AnimalNaoEncontradoException;
 import br.com.sempreaoseulado.repository.AnimalRepository;
+import br.com.sempreaoseulado.request.AnimalRequest;
+import br.com.sempreaoseulado.response.AnimalResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,25 +17,44 @@ public class AnimalService {
     @Autowired
     private AnimalRepository animalRepository;
 
-    public List<Animal> listarTodos() {
-        return animalRepository.findAll();
+    public List<AnimalResponse> listarTodos() {
+        return animalRepository.findAll()
+                .stream()
+                .map(this::converterParaResponse)
+                .toList();
     }
 
-    public Animal salvar(Animal animal) {
-        return animalRepository.save(animal);
+    public AnimalResponse buscarPorId(Long id) {
+        Animal animal = animalRepository.findById(id)
+                .orElseThrow(() -> new AnimalNaoEncontradoException());
+
+        return converterParaResponse(animal);
     }
 
-    public Animal atualizar(Long id, Animal animalAtualizado) {
+    public AnimalResponse salvar(AnimalRequest request) {
+        Animal animal = new Animal();
+
+        animal.setNome(request.getNome());
+        animal.setEspecie(request.getEspecie());
+        animal.setSituacao(request.getSituacao());
+
+        Animal animalSalvo = animalRepository.save(animal);
+
+        return converterParaResponse(animalSalvo);
+    }
+
+    public AnimalResponse atualizar(Long id, AnimalRequest request) {
         Animal animalExistente = animalRepository.findById(id)
                 .orElseThrow(AnimalNaoEncontradoException::new);
 
-        animalExistente.setNome(animalAtualizado.getNome());
-        animalExistente.setEspecie(animalAtualizado.getEspecie());
-        animalExistente.setSituacao(animalAtualizado.getSituacao());
+        animalExistente.setNome(request.getNome());
+        animalExistente.setEspecie(request.getEspecie());
+        animalExistente.setSituacao(request.getSituacao());
 
-        return animalRepository.save(animalExistente);
+        Animal animalAtualizado = animalRepository.save(animalExistente);
+
+        return converterParaResponse(animalAtualizado);
     }
-
 
     public void excluir(Long id) {
         Animal animalExistente = animalRepository.findById(id)
@@ -42,4 +63,12 @@ public class AnimalService {
         animalRepository.delete(animalExistente);
     }
 
+    private AnimalResponse converterParaResponse(Animal animal) {
+        return new AnimalResponse(
+                animal.getId(),
+                animal.getNome(),
+                animal.getEspecie(),
+                animal.getSituacao()
+        );
+    }
 }
